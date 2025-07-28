@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Roulette - Spin and Win!</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='roulette-icon.png') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='roulette-icon.png') }}">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            text-align: center;
+            max-width: 800px;
+            width: 100%;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .security-badge {
+            background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .wheel-container {
+            position: relative;
+            display: inline-block;
+            margin: 20px 0;
+        }
+
+        #wheel {
+            border-radius: 50%;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            transition: transform 0.1s ease-out;
+        }
+
+        .controls {
+            margin: 30px 0;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            color: #333;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(102, 126, 234, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(102, 126, 234, 0);
+            }
+        }
+
+        .stats {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        .stats h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        .segments-info {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        .segments-info h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .segment-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .segment-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .segment-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .segment-color {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            flex-shrink: 0;
+        }
+
+        .segment-text {
+            font-weight: 500;
+            color: #333;
+            word-break: break-word;
+        }
+
+        .result-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .result-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            animation: bounceIn 0.5s ease-out;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+
+            70% {
+                transform: scale(0.9);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .result-content h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .winner-segment {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+
+        .winner-color {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 4px solid white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .winner-text {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .close-result {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .close-result:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .segment-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="security-badge">🔒 Secure & Protected</div>
+        <h1>🎯 Your Secure Roulette is Ready!</h1>
+
+        <div class="stats">
+            <h3>📊 Your Roulette Information</h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number">{{ segments|length }}</div>
+                    <div class="stat-label">Segments</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ (100 / segments|length)|round(1) }}%</div>
+                    <div class="stat-label">Initial Probability</div>
+                </div>
+                <div class="stat-item">
+                    {% if mode == 'elimination' %}
+                    <div class="stat-number">{{ segments|length }}</div>
+                    <div class="stat-label">Max Rounds</div>
+                    {% else %}
+                    <div class="stat-number">∞</div>
+                    <div class="stat-label">Possible Spins</div>
+                    {% endif %}
+                </div>
+            </div>
+            {% if mode == 'elimination' %}
+            <div style="text-align: center; margin-top: 15px; padding: 10px; background: #fff3cd; border-radius: 8px;">
+                <strong>🏆 Elimination Mode:</strong> Segments are eliminated one by one until finding the final winner
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="wheel-container">
+            <canvas id="wheel" width="400" height="400"></canvas>
+        </div>
+
+        <div class="controls">
+            <button id="spinButton" class="btn btn-primary pulse" onclick="spin()">
+                {% if mode == 'elimination' %}
+                🎲 Round 1
+                {% else %}
+                🎲 Spin Roulette
+                {% endif %}
+            </button>
+            <button class="btn btn-secondary" onclick="resetWheel()">
+                🔄 Reset
+            </button>
+            <a href="{{ url_for('index') }}" class="btn btn-success">
+                ➕ New Roulette
+            </a>
+        </div>
+
+        <div class="segments-info">
+            <h3>🎨 Your Roulette Segments</h3>
+            <div class="segment-list">
+                {% for segment in segments %}
+                <div class="segment-item">
+                    <div class="segment-color" style="background-color: {{ segment.color|e }}"></div>
+                    <div class="segment-text">{{ segment.text|e }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Secure roulette implementation
+        class SecureRouletteWheel {
+            constructor(canvasId, segments, mode = 'normal') {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext("2d");
+                this.segments = segments.map(s => ({
+                    text: this.sanitizeText(s.text),
+                    color: this.validateColor(s.color),
+                    id: parseInt(s.id) || 0,
+                    active: Boolean(s.active)
+                }));
+                this.mode = mode;
+                this.angle = 0;
+                this.spinning = false;
+                this.spinVelocity = 0;
+                this.friction = 0.995;
+                this.centerX = this.canvas.width / 2;
+                this.centerY = this.canvas.height / 2;
+                this.radius = Math.min(this.centerX, this.centerY) - 10;
+                this.currentRound = 0;
+                this.eliminatedSegments = [];
+
+                this.draw();
+            }
+
+            sanitizeText(text) {
+                if (typeof text !== 'string') return 'Option';
+                return text.replace(/[<>]/g, '').substring(0, 50) || 'Option';
+            }
+
+            validateColor(color) {
+                const safeColors = [
+                    '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+                    '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
+                    '#F8C471', '#82E0AA', '#F1948A', '#D7BDE2', '#A3E4D7',
+                    '#F9E79F', '#D5A6BD', '#AED6F1', '#A9DFBF', '#FAD5A5'
+                ];
+                return safeColors.includes(color) ? color : safeColors[0];
+            }
+
+            draw() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.drawShadow();
+                this.drawWheel();
+                this.drawCenter();
+                this.drawArrow();
+            }
+
+            drawShadow() {
+                this.ctx.save();
+                this.ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+                this.ctx.shadowBlur = 15;
+                this.ctx.shadowOffsetX = 5;
+                this.ctx.shadowOffsetY = 5;
+                this.ctx.beginPath();
+                this.ctx.arc(this.centerX, this.centerY, this.radius, 0, 2 * Math.PI);
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.fill();
+                this.ctx.restore();
+            }
+
+            drawWheel() {
+                const activeSegments = this.segments.filter(s => s.active);
+                const anglePerSegment = (2 * Math.PI) / activeSegments.length;
+
+                activeSegments.forEach((segment, index) => {
+                    const startAngle = this.angle + (index * anglePerSegment);
+                    const endAngle = startAngle + anglePerSegment;
+
+                    // Draw segment
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(this.centerX, this.centerY);
+                    this.ctx.arc(this.centerX, this.centerY, this.radius, startAngle, endAngle);
+                    this.ctx.closePath();
+                    this.ctx.fillStyle = segment.color;
+                    this.ctx.fill();
+
+                    // Draw border
+                    this.ctx.strokeStyle = '#ffffff';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.stroke();
+
+                    // Draw text
+                    this.drawText(segment.text, startAngle + anglePerSegment / 2, index);
+                });
+            }
+
+            drawText(text, angle, segmentIndex) {
+                this.ctx.save();
+                this.ctx.translate(this.centerX, this.centerY);
+                this.ctx.rotate(angle);
+
+                const fontSize = Math.max(12, Math.min(18, this.radius / this.segments.length * 0.8));
+                this.ctx.font = `bold ${fontSize}px 'Poppins', sans-serif`;
+                this.ctx.fillStyle = this.getContrastColor(this.segments[segmentIndex].color);
+                this.ctx.textAlign = 'right';
+                this.ctx.textBaseline = 'middle';
+
+                this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+                this.ctx.shadowBlur = 2;
+                this.ctx.shadowOffsetX = 1;
+                this.ctx.shadowOffsetY = 1;
+
+                const maxWidth = this.radius * 0.7;
+                this.ctx.fillText(text, maxWidth, 0, maxWidth);
+
+                this.ctx.restore();
+            }
+
+            getContrastColor(hexColor) {
+                const r = parseInt(hexColor.substr(1, 2), 16);
+                const g = parseInt(hexColor.substr(3, 2), 16);
+                const b = parseInt(hexColor.substr(5, 2), 16);
+                const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+                return brightness > 128 ? '#000000' : '#ffffff';
+            }
+
+            drawCenter() {
+                this.ctx.beginPath();
+                this.ctx.arc(this.centerX, this.centerY, 20, 0, 2 * Math.PI);
+                this.ctx.fillStyle = '#333';
+                this.ctx.fill();
+                this.ctx.strokeStyle = '#fff';
+                this.ctx.lineWidth = 3;
+                this.ctx.stroke();
+            }
+
+            drawArrow() {
+                this.ctx.save();
+                this.ctx.translate(this.centerX, this.centerY);
+
+                this.ctx.beginPath();
+                this.ctx.moveTo(0, -this.radius - 10);
+                this.ctx.lineTo(-15, -this.radius - 30);
+                this.ctx.lineTo(15, -this.radius - 30);
+                this.ctx.closePath();
+
+                const arrowGradient = this.ctx.createLinearGradient(0, -this.radius - 25, 0, -this.radius - 5);
+                arrowGradient.addColorStop(0, '#ff6b6b');
+                arrowGradient.addColorStop(1, '#ff5252');
+
+                this.ctx.fillStyle = arrowGradient;
+                this.ctx.fill();
+                this.ctx.strokeStyle = '#fff';
+                this.ctx.lineWidth = 2;
+                this.ctx.stroke();
+
+                this.ctx.restore();
+            }
+
+            async spin() {
+                if (this.spinning) return;
+
+                this.spinning = true;
+                this.spinVelocity = 0.3 + Math.random() * 0.4;
+
+                const spinButton = document.getElementById('spinButton');
+                if (spinButton) {
+                    spinButton.disabled = true;
+                    spinButton.textContent = '🌀 Spinning...';
+                }
+
+                this.animate();
+            }
+
+            animate() {
+                if (!this.spinning) return;
+
+                this.angle += this.spinVelocity;
+                this.spinVelocity *= this.friction;
+
+                if (this.spinVelocity < 0.01) {
+                    this.stopSpin();
+                    return;
+                }
+
+                this.draw();
+                requestAnimationFrame(() => this.animate());
+            }
+
+            stopSpin() {
+                this.spinning = false;
+                this.spinVelocity = 0;
+
+                const winner = this.getWinner();
+                this.showResult(winner);
+
+                const spinButton = document.getElementById('spinButton');
+                if (spinButton) {
+                    spinButton.disabled = false;
+                    if (this.mode === 'elimination' && this.segments.filter(s => s.active).length > 1) {
+                        spinButton.innerHTML = `🎲 Round ${this.currentRound + 1}`;
+                    } else {
+                        spinButton.innerHTML = '🎲 Spin Roulette';
+                    }
+                }
+
+                if (this.mode === 'elimination') {
+                    this.processEliminationResult(winner);
+                }
+            }
+
+            getWinner() {
+                const activeSegments = this.segments.filter(s => s.active);
+                const normalizedAngle = (2 * Math.PI - (this.angle % (2 * Math.PI))) % (2 * Math.PI);
+                const anglePerSegment = (2 * Math.PI) / activeSegments.length;
+                const winnerIndex = Math.floor(normalizedAngle / anglePerSegment);
+                return activeSegments[winnerIndex] || activeSegments[0];
+            }
+
+            showResult(winner) {
+                let resultDiv = document.getElementById('result');
+                if (!resultDiv) {
+                    resultDiv = document.createElement('div');
+                    resultDiv.id = 'result';
+                    resultDiv.className = 'result-container';
+                    document.body.appendChild(resultDiv);
+                }
+
+                resultDiv.innerHTML = `
+                    <div class="result-content">
+                        <h2>🎉 Winner!</h2>
+                        <div class="winner-segment">
+                            <div class="winner-color" style="background-color: ${winner.color}"></div>
+                            <div class="winner-text">${winner.text}</div>
+                        </div>
+                        <button onclick="this.parentElement.parentElement.style.display='none'" class="close-result">
+                            Close
+                        </button>
+                    </div>
+                `;
+
+                resultDiv.style.display = 'flex';
+            }
+
+            processEliminationResult(winner) {
+                if (this.mode !== 'elimination') return;
+
+                // Remove winner from active segments
+                winner.active = false;
+                this.eliminatedSegments.push({
+                    segment: winner,
+                    round: this.currentRound + 1,
+                    position: this.segments.filter(s => s.active).length + 1
+                });
+
+                this.currentRound++;
+
+                // Redraw wheel without eliminated segment
+                setTimeout(() => {
+                    this.draw();
+                }, 2000);
+            }
+
+            reset() {
+                this.angle = 0;
+                this.spinning = false;
+                this.spinVelocity = 0;
+                this.currentRound = 0;
+                this.eliminatedSegments = [];
+
+                // Reactivate all segments
+                this.segments.forEach(segment => {
+                    segment.active = true;
+                });
+
+                this.draw();
+
+                const spinButton = document.getElementById('spinButton');
+                if (spinButton) {
+                    spinButton.disabled = false;
+                    spinButton.innerHTML = this.mode === 'elimination' ? '🎲 Round 1' : '🎲 Spin Roulette';
+                }
+            }
+        }
+
+        // Initialize secure roulette
+        let ruletaWheel;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const segments = {{ segments| tojson | safe
+        }};
+        const mode = "{{ mode|e }}";
+
+        ruletaWheel = new SecureRouletteWheel('wheel', segments, mode);
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function (e) {
+            if (e.code === 'Space' && !ruletaWheel.spinning) {
+                e.preventDefault();
+                spin();
+            } else if (e.code === 'KeyR' && !ruletaWheel.spinning) {
+                e.preventDefault();
+                resetWheel();
+            }
+        });
+        });
+
+        function spin() {
+            if (ruletaWheel) {
+                ruletaWheel.spin();
+            }
+        }
+
+        function resetWheel() {
+            if (ruletaWheel) {
+                ruletaWheel.reset();
+            }
+        }
+    </script>
+</body>
+
+</html>

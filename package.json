@@ -1,0 +1,45 @@
+{
+  "name": "ruleta-personalizada",
+  "version": "2.0.0",
+  "description": "🎡 Aplicación web interactiva para crear y girar ruletas personalizadas con Flask y JavaScript moderno",
+  "main": "app.py",
+  "scripts": {
+    "dev": "python app.py",
+    "start": "python app.py",
+    "install-deps": "pip install flask",
+    "test": "python -m pytest tests/ -v",
+    "lint": "flake8 app.py",
+    "format": "black app.py"
+  },
+  "keywords": [
+    "ruleta",
+    "roulette",
+    "flask",
+    "javascript",
+    "canvas",
+    "interactive",
+    "game",
+    "web-app"
+  ],
+  "author": "Desarrollador Web",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/usuario/ruleta-personalizada.git"
+  },
+  "bugs": {
+    "url": "https://github.com/usuario/ruleta-personalizada/issues"
+  },
+  "homepage": "https://github.com/usuario/ruleta-personalizada#readme",
+  "engines": {
+    "python": ">=3.7"
+  },
+  "dependencies": {
+    "flask": "^2.3.0"
+  },
+  "devDependencies": {
+    "pytest": "^7.0.0",
+    "flake8": "^6.0.0",
+    "black": "^23.0.0"
+  }
+}

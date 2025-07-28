@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-translate="title">Generador de Ruleta - Crea tu Ruleta Personalizada</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='roulette-icon.png') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='roulette-icon.png') }}">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 700px;
+            width: 100%;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            font-weight: 700;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .mode-selector {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border-left: 4px solid #667eea;
+        }
+
+        .mode-selector h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .mode-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .mode-option {
+            padding: 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .mode-option:hover {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #f0f4ff 0%, #ffffff 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15);
+        }
+
+        .mode-option.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .mode-option input[type="radio"] {
+            display: none;
+        }
+
+        .segments-container {
+            margin: 30px 0;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .segment-input {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-radius: 15px;
+            align-items: center;
+            animation: fadeIn 0.3s ease-out;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .segment-input:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .segment-input input[type="text"] {
+            flex: 1;
+            padding: 10px 14px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .segment-input input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .segment-number {
+            color: #667eea;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 18px;
+            border: 3px solid #667eea;
+            background: white;
+            flex-shrink: 0;
+        }
+
+        .color-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .color-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .color-option:hover {
+            transform: scale(1.15);
+            border-color: #333;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .color-option.selected {
+            border-color: #333;
+            transform: scale(1.25);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        }
+
+        .color-option.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+
+        .color-option.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            filter: grayscale(50%);
+        }
+
+        .color-option.disabled:hover {
+            transform: none;
+            border-color: transparent;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .alert-error {
+            background: #fee;
+            color: #c33;
+            border: 1px solid #fcc;
+        }
+
+        .instructions {
+            background: #e8f4fd;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border-left: 4px solid #667eea;
+        }
+
+        .instructions h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .instructions ul {
+            color: #555;
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 5px;
+        }
+
+        /* Scrollbar personalizado */
+        .segments-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .segments-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .segments-container::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 3px;
+        }
+
+        /* Selector de idiomas */
+        .language-selector {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .language-dropdown {
+            position: relative;
+        }
+
+        .language-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 15px;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            font-size: 14px;
+            color: #667eea;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.2);
+        }
+
+        .language-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .language-flag {
+            font-size: 16px;
+        }
+
+        .language-name {
+            min-width: 60px;
+            text-align: left;
+        }
+
+        .dropdown-arrow {
+            font-size: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .language-btn:hover .dropdown-arrow {
+            transform: rotate(180deg);
+        }
+
+        .language-options {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            min-width: 150px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            margin-top: 5px;
+        }
+
+        .language-options.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .language-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .language-option:first-child {
+            border-radius: 13px 13px 0 0;
+        }
+
+        .language-option:last-child {
+            border-radius: 0 0 13px 13px;
+        }
+
+        .language-option:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .mode-options {
+                grid-template-columns: 1fr;
+            }
+            
+            .segment-input {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .color-selector {
+                justify-content: center;
+            }
+            
+            .language-selector {
+                top: 10px;
+                right: 10px;
+            }
+            
+            .language-btn {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+            
+            .language-name {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 data-translate="mainHeading">🎡 Generador de Ruleta</h1>
+        
+        <div class="instructions">
+            <h3 data-translate="instructionsTitle">📋 Instrucciones:</h3>
+            <ul>
+                <li data-translate="instruction1">Elige el modo de juego (Normal o Eliminación)</li>
+                <li data-translate="instruction2">Selecciona el número de segmentos (2-20)</li>
+                <li data-translate="instruction3">Escribe el texto para cada segmento</li>
+                <li data-translate="instruction4">Selecciona colores únicos para cada segmento</li>
+                <li data-translate="instruction5">¡Crea tu ruleta personalizada!</li>
+            </ul>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" id="ruletaForm">
+            <div class="mode-selector">
+                <h3 data-translate="gameModeTitle">🎮 Modo de Juego:</h3>
+                <div class="mode-options">
+                    <div class="mode-option selected" onclick="selectMode('normal', this)">
+                        <input type="radio" name="mode" value="normal" checked>
+                        <strong data-translate="normalMode">🎯 Normal</strong><br>
+                        <small data-translate="normalModeDesc">Gira infinitas veces</small>
+                    </div>
+                    <div class="mode-option" onclick="selectMode('elimination', this)">
+                        <input type="radio" name="mode" value="elimination">
+                        <strong data-translate="eliminationMode">🏆 Eliminación</strong><br>
+                        <small data-translate="eliminationModeDesc">Las opciones se eliminan hasta encontrar el ganador</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="count" data-translate="segmentsLabel">🔢 Número de segmentos:</label>
+                <input type="number" id="count" name="count" min="2" max="20" value="5" required onchange="generarCampos()">
+            </div>
+            
+            <div id="inputs" class="segments-container"></div>
+            
+            <button type="submit" class="btn-primary" data-translate="createButton">
+                🎯 Crear Mi Ruleta
+            </button>
+        </form>
+    </div>
+
+    <script>
+        // Paleta de colores predefinidos
+        const coloresPredefinidos = [
+            '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', 
+            '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
+            '#F8C471', '#82E0AA', '#F1948A', '#D7BDE2', '#A3E4D7', 
+            '#F9E79F', '#D5A6BD', '#AED6F1', '#A9DFBF', '#FAD5A5'
+        ];
+
+        let coloresUsados = [];
+
+        function selectMode(mode, element) {
+            // Remover selección anterior
+            document.querySelectorAll('.mode-option').forEach(opt => opt.classList.remove('selected'));
+            // Seleccionar nuevo
+            element.classList.add('selected');
+            // Marcar radio button
+            element.querySelector('input[type="radio"]').checked = true;
+        }
+
+        function selectColor(segmentIndex, color, element) {
+            console.log(`Seleccionando color ${color} para segmento ${segmentIndex}`);
+            
+            // Buscar el input de color para este segmento
+            const colorInput = document.querySelector(`input[name="color_${segmentIndex}"]`);
+            if (!colorInput) {
+                console.error(`No se encontró input para color_${segmentIndex}`);
+                return;
+            }
+
+            // Remover color anterior de la lista de usados
+            const previousColor = colorInput.value;
+            if (previousColor && coloresUsados.includes(previousColor)) {
+                const index = coloresUsados.indexOf(previousColor);
+                coloresUsados.splice(index, 1);
+            }
+
+            // Asignar nuevo color
+            colorInput.value = color;
+            if (!coloresUsados.includes(color)) {
+                coloresUsados.push(color);
+            }
+            
+            // Actualizar selección visual en este segmento
+            const container = element.closest('.segment-input');
+            if (container) {
+                // Remover selección anterior
+                container.querySelectorAll('.color-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                // Agregar selección nueva
+                element.classList.add('selected');
+            }
+            
+            // Actualizar disponibilidad global de colores
+            updateColorAvailability();
+            
+            console.log(`Color ${color} asignado correctamente al segmento ${segmentIndex}`);
+        }
+
+        function updateColorAvailability() {
+            document.querySelectorAll('.color-option').forEach(colorOption => {
+                const color = colorOption.dataset.color;
+                if (coloresUsados.includes(color) && !colorOption.classList.contains('selected')) {
+                    colorOption.classList.add('disabled');
+                } else {
+                    colorOption.classList.remove('disabled');
+                }
+            });
+        }
+
+        function generarCampos() {
+            console.log('Generando campos...');
+            const cantidad = parseInt(document.getElementById("count").value);
+            const container = document.getElementById("inputs");
+            
+            console.log(`Cantidad solicitada: ${cantidad}`);
+            
+            if (isNaN(cantidad) || cantidad < 2 || cantidad > 20) {
+                const t = (key) => languageManager ? languageManager.t(key) : key;
+                const errorMsg = `${t('numberBetween')} 2 ${t('and')} 20`;
+                container.innerHTML = `<div class="alert alert-error">${errorMsg}</div>`;
+                return;
+            }
+            
+            // Limpiar contenedor y colores usados
+            container.innerHTML = "";
+            coloresUsados = [];
+
+            for (let i = 0; i < cantidad; i++) {
+                console.log(`Creando segmento ${i + 1}`);
+                
+                // Crear el div del segmento
+                const segmentDiv = document.createElement('div');
+                segmentDiv.className = 'segment-input';
+                
+                // Color por defecto para este segmento
+                const defaultColor = coloresPredefinidos[i % coloresPredefinidos.length];
+                
+                // Crear el número del segmento
+                const segmentNumber = document.createElement('div');
+                segmentNumber.className = 'segment-number';
+                segmentNumber.textContent = i + 1;
+                
+                // Crear el input de texto
+                const textInput = document.createElement('input');
+                textInput.type = 'text';
+                textInput.name = `text_${i}`;
+                const t = (key) => languageManager ? languageManager.t(key) : key;
+                textInput.placeholder = `${t('segmentPlaceholder')} ${i + 1}`;
+                textInput.maxLength = 50;
+                
+                // Crear el input oculto para el color
+                const colorInput = document.createElement('input');
+                colorInput.type = 'hidden';
+                colorInput.name = `color_${i}`;
+                colorInput.value = defaultColor;
+                
+                // Crear el selector de colores
+                const colorSelector = document.createElement('div');
+                colorSelector.className = 'color-selector';
+                
+                // Agregar opciones de color
+                const coloresParaUsar = coloresPredefinidos.slice(0, Math.max(cantidad, 15));
+                coloresParaUsar.forEach(color => {
+                    const colorOption = document.createElement('div');
+                    colorOption.className = 'color-option';
+                    if (color === defaultColor) {
+                        colorOption.classList.add('selected');
+                    }
+                    colorOption.style.backgroundColor = color;
+                    colorOption.dataset.color = color;
+                    colorOption.title = color;
+                    colorOption.onclick = function() {
+                        selectColor(i, color, this);
+                    };
+                    colorSelector.appendChild(colorOption);
+                });
+                
+                // Ensamblar el segmento
+                segmentDiv.appendChild(segmentNumber);
+                segmentDiv.appendChild(textInput);
+                segmentDiv.appendChild(colorInput);
+                segmentDiv.appendChild(colorSelector);
+                
+                // Agregar al contenedor
+                container.appendChild(segmentDiv);
+                
+                // Marcar color como usado
+                coloresUsados.push(defaultColor);
+            }
+            
+            // Actualizar disponibilidad de colores
+            updateColorAvailability();
+            
+            console.log(`${cantidad} segmentos creados correctamente`);
+        }
+
+        // Validación del formulario mejorada
+        document.getElementById('ruletaForm').addEventListener('submit', function(e) {
+            console.log('Validando formulario...');
+            
+            const count = parseInt(document.getElementById('count').value);
+            console.log(`Validando ${count} segmentos`);
+            
+            if (isNaN(count) || count < 2 || count > 20) {
+                e.preventDefault();
+                const t = (key) => languageManager ? languageManager.t(key) : key;
+                alert(`${t('segmentsBetween')} 2 ${t('and')} 20`);
+                return false;
+            }
+            
+            // Verificar que los campos existen y tienen valores
+            let missingFields = [];
+            let validSegments = 0;
+            
+            for (let i = 0; i < count; i++) {
+                const textInput = document.querySelector(`input[name="text_${i}"]`);
+                const colorInput = document.querySelector(`input[name="color_${i}"]`);
+                
+                if (!textInput) {
+                    console.error(`Campo text_${i} no encontrado`);
+                    missingFields.push(`text_${i}`);
+                    continue;
+                }
+                
+                if (!colorInput) {
+                    console.error(`Campo color_${i} no encontrado`);
+                    missingFields.push(`color_${i}`);
+                    continue;
+                }
+                
+                // Si el campo de texto está vacío, llenar con placeholder
+                if (!textInput.value.trim()) {
+                    const t = (key) => languageManager ? languageManager.t(key) : key;
+                    textInput.value = `${t('segmentPlaceholder')} ${i + 1}`;
+                }
+                
+                // Si el color está vacío, asignar uno por defecto
+                if (!colorInput.value) {
+                    colorInput.value = coloresPredefinidos[i % coloresPredefinidos.length];
+                }
+                
+                validSegments++;
+                console.log(`Segmento ${i}: texto="${textInput.value}", color="${colorInput.value}"`);
+            }
+            
+            // Verificar modo de juego
+            const modeInput = document.querySelector('input[name="mode"]:checked');
+            if (!modeInput) {
+                console.error('Modo de juego no seleccionado');
+                e.preventDefault();
+                const t = (key) => languageManager ? languageManager.t(key) : key;
+                alert(t('selectGameMode'));
+                return false;
+            }
+            
+            console.log(`Modo seleccionado: ${modeInput.value}`);
+            
+            if (missingFields.length > 0) {
+                console.error('Campos faltantes:', missingFields);
+                e.preventDefault();
+                const t = (key) => languageManager ? languageManager.t(key) : key;
+                alert(t('formFieldsError'));
+                return false;
+            }
+            
+            if (validSegments !== count) {
+                console.error(`Segmentos válidos (${validSegments}) no coincide con cantidad esperada (${count})`);
+                e.preventDefault();
+                const t = (key) => languageManager ? languageManager.t(key) : key;
+                alert(t('segmentValidationError'));
+                return false;
+            }
+            
+            console.log(`Formulario válido: ${validSegments} segmentos, modo: ${modeInput.value}`);
+            return true;
+        });
+
+        // Inicializar aplicación
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Inicializando aplicación...');
+            generarCampos();
+            console.log('Aplicación inicializada correctamente');
+        });
+    </script>
+    
+    <!-- Incluir sistema de traducciones -->
+    <script src="{{ url_for('static', filename='translations.js') }}"></script>
+</body>
+</html>
